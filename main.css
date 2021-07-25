@@ -1,0 +1,32 @@
+html,
+body {
+  height: 100vh;
+}
+
+.container {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 5%;
+}
+.snake-field {
+  background-color: blue;
+  box-sizing: border-box;
+  height: 100%;
+  border: 3px solid red;
+  position: relative;
+}
+
+.snake {
+  position: absolute;
+  width: 4%;
+  height: 4%;
+  background-color: yellowgreen;
+}
+
+.snake-tail {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+  background-color: teal;
+}
