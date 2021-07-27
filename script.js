@@ -9,7 +9,8 @@ class Snake {
   };
   movignDir;
   oldPosition;
-  moveByNumber = 40; // px
+  moveByNumber = 50; // px
+  foodPosition;
 
   constructor(element) {
     this.snakeElement = element;
@@ -57,22 +58,46 @@ class Snake {
       moveFunc();
       this.moveInterval = setInterval(function () {
         moveFunc();
-      }, 100);
+      }, 500);
     }
   }
 
   checkWallHit(movedX, movedY) {
+    movedX = +movedX;
+    movedY = +movedY
     if (
-      +movedX < 0 ||
-      +movedX + +this.snakeElement.clientWidth > this.fieldWidth
+      movedX < 0 ||
+      movedX + (+this.snakeElement.clientWidth) > this.fieldWidth
     ) {
       alert("You hit wall");
       clearInterval(this.moveInterval);
     } else if (
-      +movedY + +this.snakeElement.clientHeight > this.fieldHeight ||
+      movedY + (+this.snakeElement.clientHeight) > this.fieldHeight ||
       movedY < 0
     ) {
+      console.log(movedY + (+this.snakeElement.clientHeight), this.fieldHeight);
       alert("You hit wall");
+      clearInterval(this.moveInterval);
+    }
+  }
+
+  checkCollision() {
+    const allBlock = this.getAllBlock();
+    const eachBlockPosition = [];
+
+    for (let i = 1; i < allBlock.length; i++) {
+      const currChildPosX = allBlock[i].style.transform
+        .split(",")[0]
+        ?.match(this.numberRegex)?.[0];
+      const currChildPosY = allBlock[i].style.transform
+        .split(",")[1]
+        ?.match(this.numberRegex)?.[0];
+      const currChildPos = `translate(${currChildPosX}px, ${currChildPosY}px)`;
+      eachBlockPosition.push(currChildPos);
+    }
+    if (eachBlockPosition.includes(allBlock[0].style.transform)) {
+      this.snakeElement.classList += ' animate-block'
+      alert("Collision!! You lost");
       clearInterval(this.moveInterval);
     }
   }
@@ -94,6 +119,7 @@ class Snake {
       this.checkWallHit(movedXPx, toMove);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
+      this.checkCollision()
     }
   }
 
@@ -114,6 +140,7 @@ class Snake {
       this.checkWallHit(movedXPx, toMove);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
+      this.checkCollision()
     }
   }
 
@@ -134,6 +161,7 @@ class Snake {
       this.checkWallHit(toMove, movedYPx);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
+      this.checkCollision()
     }
   }
 
@@ -154,11 +182,12 @@ class Snake {
       this.checkWallHit(toMove, movedYPx);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
+      this.checkCollision()
     }
   }
 
   moveTailBlocks() {
-    const allBlock = [...document.getElementsByClassName("snake")];
+    const allBlock = this.getAllBlock();
     for (let i = 1; i < allBlock.length; i++) {
       const currChildPosX = allBlock[i].style.transform
         .split(",")[0]
@@ -170,16 +199,30 @@ class Snake {
       allBlock[i].style.transform = this.oldPosition;
       this.oldPosition = currChildPos;
     }
-    console.log(allBlock)
   }
 
   addTail() {
-    const allBlock = [...document.getElementsByClassName("snake")];
+    const allBlock = this.getAllBlock();
     const tailBlock = document.createElement("div");
     tailBlock.style.backgroundColor = "yellowgreen";
     tailBlock.classList.value = "snake";
     tailBlock.style.transform = this.oldPosition;
     allBlock[allBlock.length - 1].insertAdjacentElement("afterend", tailBlock);
+    this.spawnRandomBlock()
+  }
+
+  spawnRandomBlock() {
+    const randPosX = Math.floor((Math.random() * this.fieldWidth));
+    const randPosY = Math.floor((Math.random() * this.fieldHeight));
+    const randomBlock = document.createElement("div");
+    randomBlock.classList.value = "food";
+    randomBlock.style.transform = `translate(${randPosX}px, ${randPosY}px)`
+    document.getElementById('field').appendChild(randomBlock);
+    this.foodPosition = `translate(${randPosX}px, ${randPosY}px)`;
+  }
+
+  getAllBlock() {
+    return document.getElementsByClassName("snake");
   }
 }
 
