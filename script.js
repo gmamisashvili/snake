@@ -18,6 +18,7 @@ class Snake {
     this.listenButton();
     this.adjustFieldSize();
     this.snakeElement = element;
+    this.listenSpeedChange();
     this.spawnRandomBlock();
     document.addEventListener("keydown", (event) => {
       this.detectMove(event.keyCode);
@@ -123,6 +124,22 @@ class Snake {
       this.showModal();
       clearInterval(this.moveInterval);
     }
+  }
+
+  listenSpeedChange() {
+    document.getElementById('speed').addEventListener('change', event => {
+      switch (event.target.value) {
+        case 'slow':
+          this.speedInterval = 500;
+          break
+        case 'medium':
+          this.speedInterval = 250;
+          break;
+        case 'fast':
+          this.speedInterval = 100;
+          break;
+      }
+    })
   }
 
   checkCollision() {
