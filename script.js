@@ -189,7 +189,7 @@ class Snake {
     this.movignDir = this.movingObj["up"];
     const snakeTranslate = this.snakeElement.style;
     if (!snakeTranslate.transform) {
-      alert("U lost");
+      this.showModal();
     } else {
       const movedXPx = snakeTranslate.transform
         .split(",")[0]
@@ -233,7 +233,7 @@ class Snake {
     this.movignDir = this.movingObj["right"];
     const snakeTranslate = this.snakeElement.style;
     if (!snakeTranslate.transform) {
-      alert("U lost");
+      this.showModal();
     } else {
       const movedXPx = snakeTranslate.transform
         .split(",")[0]
