@@ -6,26 +6,72 @@ class Snake {
     bottom: 1,
     left: 2,
     up: 3,
+    none: 4
   };
   movignDir;
   oldPosition;
   moveByNumber = 50; // px
   foodPosition;
+  speedInterval = 200;
 
   constructor(element) {
+    this.listenButton();
+    this.adjustFieldSize();
     this.snakeElement = element;
-    this.fieldWidth = document.getElementById("field").clientWidth;
-    this.fieldHeight = document.getElementById("field").clientHeight;
+    this.spawnRandomBlock();
     document.addEventListener("keydown", (event) => {
       this.detectMove(event.keyCode);
     });
   }
 
+  listenButton() {
+    document.getElementById("play-button").addEventListener("click", () => {
+      this.hideModal();
+    })
+  };
+
+
+
+  adjustFieldSize() {
+    const field = document.getElementById('field')
+    const fieldWidth = document.getElementById("field").clientWidth;
+    const fieldHeight = document.getElementById("field").clientHeight;
+    this.fieldWidth = Math.floor(fieldWidth - (fieldWidth % this.moveByNumber));
+    this.fieldHeight = Math.floor(fieldHeight - (fieldHeight % this.moveByNumber));
+    field.style.height = `${this.fieldHeight}px`;
+    field.style.width = `${this.fieldWidth}px`;
+  }
+
   checkRestrictedMove(movignDir, dir) {
-    if (movignDir !== dir && movignDir - 2 !== dir && movignDir + 2 !== dir) {
-      console.log(movignDir, dir);
+    if (movignDir === this.movingObj['none']) {
       return true;
     }
+    if (movignDir !== dir && movignDir - 2 !== dir && movignDir + 2 !== dir) {
+      return true;
+    }
+  }
+
+  resetSnake() {
+    const allBlock = this.getAllBlock();
+
+    this.snakeElement.style.transform = 'translate(0, 0)'
+    document.getElementById('score').innerText = 0;
+    let i = allBlock.length -1;
+    while (i > 0) {
+      allBlock[i].parentNode.removeChild(allBlock[i])
+      i--;
+    }
+    this.movignDir = this.movingObj['none'];
+    this.snakeElement.classList.remove('animate-block');
+  }
+
+  hideModal() {
+    document.getElementById('modal').style.visibility = 'hidden'
+    this.resetSnake();
+  }
+
+  showModal() {
+    document.getElementById('modal').style.visibility = 'visible'
   }
 
   detectMove(keyCode) {
@@ -42,9 +88,6 @@ class Snake {
       case 38:
         this.keyHandler(this.moveUp.bind(this), this.movingObj["up"]);
         break;
-      case 81:
-        this.addTail();
-        break;
       default:
         break;
     }
@@ -58,7 +101,7 @@ class Snake {
       moveFunc();
       this.moveInterval = setInterval(function () {
         moveFunc();
-      }, 500);
+      }, this.speedInterval);
     }
   }
 
@@ -69,14 +112,15 @@ class Snake {
       movedX < 0 ||
       movedX + (+this.snakeElement.clientWidth) > this.fieldWidth
     ) {
-      alert("You hit wall");
+      this.snakeElement.classList += ' animate-block'
+      this.showModal();
       clearInterval(this.moveInterval);
     } else if (
       movedY + (+this.snakeElement.clientHeight) > this.fieldHeight ||
       movedY < 0
     ) {
-      console.log(movedY + (+this.snakeElement.clientHeight), this.fieldHeight);
-      alert("You hit wall");
+      this.snakeElement.classList += ' animate-block'
+      this.showModal();
       clearInterval(this.moveInterval);
     }
   }
@@ -97,7 +141,7 @@ class Snake {
     }
     if (eachBlockPosition.includes(allBlock[0].style.transform)) {
       this.snakeElement.classList += ' animate-block'
-      alert("Collision!! You lost");
+      this.showModal();
       clearInterval(this.moveInterval);
     }
   }
@@ -119,7 +163,8 @@ class Snake {
       this.checkWallHit(movedXPx, toMove);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
-      this.checkCollision()
+      this.checkCollision();
+      this.checkFood();
     }
   }
 
@@ -141,6 +186,7 @@ class Snake {
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
       this.checkCollision()
+      this.checkFood();
     }
   }
 
@@ -161,7 +207,8 @@ class Snake {
       this.checkWallHit(toMove, movedYPx);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
-      this.checkCollision()
+      this.checkCollision();
+      this.checkFood();
     }
   }
 
@@ -182,7 +229,8 @@ class Snake {
       this.checkWallHit(toMove, movedYPx);
       this.oldPosition = `translate(${movedXPx}px, ${movedYPx}px)`;
       this.moveTailBlocks(this.oldPosition);
-      this.checkCollision()
+      this.checkCollision();
+      this.checkFood();
     }
   }
 
@@ -208,17 +256,38 @@ class Snake {
     tailBlock.classList.value = "snake";
     tailBlock.style.transform = this.oldPosition;
     allBlock[allBlock.length - 1].insertAdjacentElement("afterend", tailBlock);
-    this.spawnRandomBlock()
   }
 
   spawnRandomBlock() {
     const randPosX = Math.floor((Math.random() * this.fieldWidth));
     const randPosY = Math.floor((Math.random() * this.fieldHeight));
+    const realX = randPosX - (randPosX % 50)
+    const realY = randPosY - (randPosY % 50)
     const randomBlock = document.createElement("div");
     randomBlock.classList.value = "food";
-    randomBlock.style.transform = `translate(${randPosX}px, ${randPosY}px)`
+    randomBlock.id += 'food'
+    randomBlock.style.transform = `translate(${realX}px, ${realY}px)`
     document.getElementById('field').appendChild(randomBlock);
-    this.foodPosition = `translate(${randPosX}px, ${randPosY}px)`;
+    this.foodPosition = `translate(${realX}px, ${realY}px)`;
+  }
+
+  checkFood() {
+    if (this.foodPosition === this.snakeElement.style.transform) {
+      this.addTail();
+      this.deleteFood();
+      this.spawnRandomBlock();
+      this.addScore();
+    }
+  }
+
+  deleteFood() {
+    const food = document.getElementById('food');
+    food.parentNode.removeChild(food);
+  }
+
+  addScore() {
+    const score = +document.getElementById('score').innerText
+    document.getElementById('score').innerText = score + 1;
   }
 
   getAllBlock() {

@@ -12,9 +12,23 @@
 
 <body>
     <div class="container">
+        <div class="space-around">
+            <div class="score">Your score: <span id="score">0</span></div>
+            <div>
+                <label for="speed">Speed</label>
+                <select id="speed" name="speed">
+                    <option value="slow">slow</option>
+                    <option value="medium">medium</option>
+                    <option value="fast">fast</option>
+                </select>
+            </div>
+        </div>
         <div id="field" class="snake-field">
             <div id="snake" class="snake"></div>
         </div>
+    </div>
+    <div class="modal" id="modal">
+        You lost <button class="play-button" id="play-button">Play again</button>
     </div>
     <script src="./script.js"></script>
 </body>
