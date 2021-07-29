@@ -13,6 +13,7 @@ class Snake {
   moveByNumber = 50; // px
   foodPosition;
   speedInterval = 200;
+  crashed;
 
   constructor(element) {
     this.listenButton();
@@ -64,6 +65,7 @@ class Snake {
     }
     this.movignDir = this.movingObj['none'];
     this.snakeElement.classList.remove('animate-block');
+    this.crashed = false;
   }
 
   hideModal() {
@@ -72,10 +74,14 @@ class Snake {
   }
 
   showModal() {
-    document.getElementById('modal').style.visibility = 'visible'
+    document.getElementById('modal').style.visibility = 'visible';
+    this.crashed = true;
   }
 
   detectMove(keyCode) {
+    if (this.crashed) {
+      return ;
+    }
     switch (keyCode) {
       case 39:
         this.keyHandler(this.moveRight.bind(this), this.movingObj["left"]);
@@ -100,7 +106,11 @@ class Snake {
         clearInterval(this.moveInterval);
       }
       moveFunc();
+      const that = this
       this.moveInterval = setInterval(function () {
+        if (that.crashed) {
+          return;
+        }
         moveFunc();
       }, this.speedInterval);
     }
