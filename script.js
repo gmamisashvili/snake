@@ -54,7 +54,6 @@ class Snake {
   }
 
   resetSnake() {
-    debugger
     const allBlock = this.getAllBlock();
 
     this.snakeElement.style.transform = 'translate(0, 0)'
@@ -110,6 +109,7 @@ class Snake {
       const that = this
       this.moveInterval = setInterval(function () {
         if (that.crashed) {
+          clearInterval(that.moveInterval)
           return;
         }
         moveFunc();
@@ -150,6 +150,7 @@ class Snake {
           this.speedInterval = 100;
           break;
       }
+      document.activeElement.blur();
     })
   }
 
